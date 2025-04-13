@@ -1,0 +1,107 @@
+openapi: 3.0.3
+info:
+  title: Vulnerability Scan API
+  description: REST APIs for scanning and querying vulnerability scan results from GitHub.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /scan:
+    post:
+      summary: Scan GitHub repository for JSON files
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - repo
+                - files
+              properties:
+                repo:
+                  type: string
+                  example: "https://github.com/velancio/vulnerability_scans"
+                files:
+                  type: array
+                  items:
+                    type: string
+                  example: ["sample1.json", "sample2.json"]
+      responses:
+        '200':
+          description: Scan complete
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+        '400':
+          description: Invalid request
+
+  /query:
+    post:
+      summary: Query stored scan results using filters
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - filters
+              properties:
+                filters:
+                  type: object
+                  properties:
+                    severity:
+                      type: string
+                      example: "HIGH"
+      responses:
+        '200':
+          description: List of matching results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Vulnerability'
+        '400':
+          description: Invalid filter
+
+components:
+  schemas:
+    Vulnerability:
+      type: object
+      properties:
+        id:
+          type: string
+          example: CVE-2024-1234
+        severity:
+          type: string
+        cvss:
+          type: number
+        status:
+          type: string
+        package_name:
+          type: string
+        current_version:
+          type: string
+        fixed_version:
+          type: string
+        description:
+          type: string
+        published_date:
+          type: string
+          format: date-time
+        link:
+          type: string
+          format: uri
+        risk_factors:
+          type: array
+          items:
+            type: string
